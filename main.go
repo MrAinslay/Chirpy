@@ -34,6 +34,7 @@ func main() {
 
 	apiRouter.Get("/reset", apiCfg.handlerReset)
 	apiRouter.Get("/healthz", handlerReadiness)
+	apiRouter.Post("/validate_chirp", validateChirp)
 
 	adminRouter.Get("/metrics", apiCfg.handlerMetrics)
 
