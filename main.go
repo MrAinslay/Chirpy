@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -16,7 +17,9 @@ func main() {
 	const filepathRoot = "."
 	const port = "8080"
 
-	r := chi.NewRouter()
+	mainRouter := chi.NewRouter()
+	apiRouter := chi.NewRouter()
+	adminRouter := chi.NewRouter()
 
 	apiCfg := apiConfig{
 		fileserverHits: 0,
@@ -24,14 +27,17 @@ func main() {
 
 	fsHandler := apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
 
-	r.Handle("/app/*", fsHandler)
-	r.Handle("/app", fsHandler)
+	mainRouter.Handle("/app/*", fsHandler)
+	mainRouter.Handle("/app", fsHandler)
+	mainRouter.Mount("/api", apiRouter)
+	mainRouter.Mount("/admin", adminRouter)
 
-	r.Get("/reset", apiCfg.handlerReset)
-	r.Get("/healthz", handlerReadiness)
-	r.Get("/metrics", apiCfg.handlerMetrics)
+	apiRouter.Get("/reset", apiCfg.handlerReset)
+	apiRouter.Get("/healthz", handlerReadiness)
 
-	corsMux := middlewareCors(r)
+	adminRouter.Get("/metrics", apiCfg.handlerMetrics)
+
+	corsMux := middlewareCors(mainRouter)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
@@ -43,8 +49,17 @@ func main() {
 }
 
 func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
+	t, err := template.ParseFiles("metricsTemplate.html")
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if err := t.Execute(w, map[string]interface{}{"Metrics": fmt.Sprint(cfg.fileserverHits)}); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 	w.Write([]byte(fmt.Sprintf("Hits: %d", cfg.fileserverHits)))
 }
 
