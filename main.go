@@ -21,6 +21,8 @@ func main() {
 	apiRouter := chi.NewRouter()
 	adminRouter := chi.NewRouter()
 
+	db, _ := NewDB("database.json")
+
 	apiCfg := apiConfig{
 		fileserverHits: 0,
 	}
@@ -34,7 +36,8 @@ func main() {
 
 	apiRouter.Get("/reset", apiCfg.handlerReset)
 	apiRouter.Get("/healthz", handlerReadiness)
-	apiRouter.Post("/validate_chirp", validateChirp)
+	apiRouter.Get("/chirps", db.getHandler)
+	apiRouter.Post("/chirps", db.postHandler)
 
 	adminRouter.Get("/metrics", apiCfg.handlerMetrics)
 
