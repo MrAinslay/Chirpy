@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
+	"sync"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -21,7 +23,16 @@ func main() {
 	apiRouter := chi.NewRouter()
 	adminRouter := chi.NewRouter()
 
-	db, _ := NewDB("database.json")
+	mux := &sync.RWMutex{}
+
+	db := DB{
+		path: "database.json",
+		mux:  mux,
+	}
+
+	if _, err := os.ReadFile("database.json"); err != nil {
+		db.ensureDB()
+	}
 
 	apiCfg := apiConfig{
 		fileserverHits: 0,
@@ -37,8 +48,11 @@ func main() {
 	apiRouter.Get("/reset", apiCfg.handlerReset)
 	apiRouter.Get("/healthz", handlerReadiness)
 	apiRouter.Get("/chirps", db.getHandler)
+
 	apiRouter.Post("/users", db.usersPostHandler)
+	apiRouter.Post("/login", db.loginHnalder)
 	apiRouter.Post("/chirps", db.postHandler)
+
 	apiRouter.Route("/chirps/{id}", func(r chi.Router) {
 		r.Get("/", db.getIdHandler)
 	})

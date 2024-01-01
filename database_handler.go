@@ -14,7 +14,7 @@ type DB struct {
 
 type DBStructure struct {
 	Chirps map[int]Chirp `json:"chirps"`
-	Users  map[int]User  `json:"email"`
+	Users  map[int]User  `json:"users"`
 }
 
 func NewDB(path string) (*DB, error) {
@@ -38,11 +38,14 @@ func NewDB(path string) (*DB, error) {
 
 func (db *DB) ensureDB() error {
 	_, err := os.ReadFile("database.json")
-	if err == os.ErrNotExist {
-		newDatabase, erro := NewDB("database.json")
+	if err != nil {
+		newDatabase, err2 := NewDB("database.json")
+		if err2 != nil {
+			return err2
+		}
 		db.path = newDatabase.path
 		db.mux = newDatabase.mux
-		return erro
+		return nil
 	}
 	return err
 }
@@ -85,8 +88,8 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 	if err2 != nil {
 		return err
 	}
+	defer db.mux.Unlock()
 	db.mux.Lock()
 	os.WriteFile("database.json", []byte(dat), 0666)
-	defer db.mux.Unlock()
 	return nil
 }
