@@ -7,11 +7,6 @@ import (
 	"sync"
 )
 
-type Chirp struct {
-	Id   int    `json:"id"`
-	Body string `json:"body"`
-}
-
 type DB struct {
 	path string
 	mux  *sync.RWMutex
@@ -24,14 +19,6 @@ type DBStructure struct {
 func NewDB(path string) (*DB, error) {
 	databaseData := []byte(`{
 		"chirps": {
-		  "1": {
-			"id": 1,
-			"body": "This is the first chirp ever!"
-		  },
-		  "2": {
-			"id": 2,
-			"body": "Hello, world!"
-		  }
 		}
 	  }`)
 	err := os.WriteFile("database.json", databaseData, 0666)
