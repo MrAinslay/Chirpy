@@ -14,6 +14,7 @@ type DB struct {
 
 type DBStructure struct {
 	Chirps map[int]Chirp `json:"chirps"`
+	Users  map[int]User  `json:"email"`
 }
 
 func NewDB(path string) (*DB, error) {
@@ -68,16 +69,24 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 	if err != nil {
 		return err
 	}
+
+	if datbase.Users == nil {
+		datbase.Users = map[int]User{}
+	}
+
 	for index, chrp := range dbstructure.Chirps {
 		datbase.Chirps[index] = chrp
+	}
+	for index, usr := range dbstructure.Users {
+		datbase.Users[index] = usr
 	}
 
 	dat, err2 := json.Marshal(datbase)
 	if err2 != nil {
 		return err
 	}
-
+	db.mux.Lock()
 	os.WriteFile("database.json", []byte(dat), 0666)
-
+	defer db.mux.Unlock()
 	return nil
 }

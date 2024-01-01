@@ -37,7 +37,11 @@ func main() {
 	apiRouter.Get("/reset", apiCfg.handlerReset)
 	apiRouter.Get("/healthz", handlerReadiness)
 	apiRouter.Get("/chirps", db.getHandler)
+	apiRouter.Post("/users", db.usersPostHandler)
 	apiRouter.Post("/chirps", db.postHandler)
+	apiRouter.Route("/chirps/{id}", func(r chi.Router) {
+		r.Get("/", db.getIdHandler)
+	})
 
 	adminRouter.Get("/metrics", apiCfg.handlerMetrics)
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func respondWithJson(w http.ResponseWriter, chrp Chirp) {
-	dat, _ := json.Marshal(chrp)
+func respondWithJson(w http.ResponseWriter, data any) {
+	dat, _ := json.Marshal(data)
 	w.Write(dat)
 }
