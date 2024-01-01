@@ -69,7 +69,15 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 		return err
 	}
 	for index, chrp := range dbstructure.Chirps {
-		datbase.Chirps[index-1] = chrp
+		datbase.Chirps[index] = chrp
 	}
+
+	dat, err2 := json.Marshal(datbase)
+	if err2 != nil {
+		return err
+	}
+
+	os.WriteFile("database.json", []byte(dat), 0666)
+
 	return nil
 }
