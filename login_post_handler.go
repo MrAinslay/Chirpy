@@ -10,12 +10,14 @@ import (
 
 func (db *DB) loginHnalder(w http.ResponseWriter, r *http.Request) {
 	type loginInfo struct {
-		Password string `json:"password"`
-		Email    string `json:"email"`
+		Password   string `json:"password"`
+		Email      string `json:"email"`
+		Expiration string `json:"expires_in_seconds"`
 	}
 	type loginResp struct {
-		Id    int    `json:"id"`
-		Email string `json:"email"`
+		Id         int    `json:"id"`
+		Email      string `json:"email"`
+		Expiration string `json:"expires_in_seconds"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -35,6 +37,7 @@ func (db *DB) loginHnalder(w http.ResponseWriter, r *http.Request) {
 				respondWithError(w, 401, fmt.Sprint(err))
 				return
 			}
+
 			loginRsp := loginResp{
 				Id:    usr.Id,
 				Email: usr.Email,

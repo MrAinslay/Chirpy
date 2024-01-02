@@ -9,13 +9,18 @@ import (
 	"sync"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 )
 
 type apiConfig struct {
 	fileserverHits int
+	jwtKey         string
 }
 
 func main() {
+	godotenv.Load()
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	const filepathRoot = "."
 	const port = "8080"
 
@@ -36,6 +41,7 @@ func main() {
 
 	apiCfg := apiConfig{
 		fileserverHits: 0,
+		jwtKey:         jwtSecret,
 	}
 
 	fsHandler := apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
@@ -49,9 +55,11 @@ func main() {
 	apiRouter.Get("/healthz", handlerReadiness)
 	apiRouter.Get("/chirps", db.getHandler)
 
+	apiRouter.Post("/chirps", db.postHandler)
 	apiRouter.Post("/users", db.usersPostHandler)
 	apiRouter.Post("/login", db.loginHnalder)
-	apiRouter.Post("/chirps", db.postHandler)
+
+	apiRouter.Put("/users", db.putHandler)
 
 	apiRouter.Route("/chirps/{id}", func(r chi.Router) {
 		r.Get("/", db.getIdHandler)
