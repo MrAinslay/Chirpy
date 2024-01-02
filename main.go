@@ -64,6 +64,7 @@ func main() {
 	apiRouter.Put("/users", db.putHandler)
 
 	apiRouter.Route("/chirps/{id}", func(r chi.Router) {
+		r.Delete("/", db.chirpsDeleteHandler)
 		r.Get("/", db.getIdHandler)
 	})
 

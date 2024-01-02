@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func (db *DB) postHandler(w http.ResponseWriter, r *http.Request) {
@@ -11,16 +12,27 @@ func (db *DB) postHandler(w http.ResponseWriter, r *http.Request) {
 		Body string `json:"body"`
 	}
 
+	jwtTkn, err := validateToken(w, r)
+	if err != nil {
+		respondWithError(w, 401, fmt.Sprint(err))
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 
 	if err := decoder.Decode(&params); err != nil {
 		respondWithError(w, 400, fmt.Sprint(err))
+		return
 	}
 
-	chrp, err := db.CreateChirp(params.Body)
+	strId, _ := jwtTkn.Claims.GetSubject()
+	id, _ := strconv.Atoi(strId)
+
+	chrp, err := db.CreateChirp(params.Body, id)
 	if err != nil {
 		respondWithError(w, 400, fmt.Sprint(err))
+		return
 	}
 	dbstruct := DBStructure{}
 	if dbstruct.Chirps == nil {

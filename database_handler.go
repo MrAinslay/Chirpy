@@ -82,15 +82,9 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 		datbase.RevockedTokens = map[int]RevokedToken{}
 	}
 
-	for index, chrp := range dbstructure.Chirps {
-		datbase.Chirps[index] = chrp
-	}
-	for index, usr := range dbstructure.Users {
-		datbase.Users[index] = usr
-	}
-	for index, tkn := range dbstructure.RevockedTokens {
-		datbase.RevockedTokens[index] = tkn
-	}
+	datbase.Chirps = dbstructure.Chirps
+	datbase.Users = dbstructure.Users
+	datbase.RevockedTokens = dbstructure.RevockedTokens
 
 	dat, err2 := json.Marshal(datbase)
 	if err2 != nil {

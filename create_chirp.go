@@ -6,11 +6,12 @@ import (
 )
 
 type Chirp struct {
-	Id   int    `json:"id"`
-	Body string `json:"body"`
+	AuthorId int    `json:"author_id"`
+	Id       int    `json:"id"`
+	Body     string `json:"body"`
 }
 
-func (db *DB) CreateChirp(body string) (Chirp, error) {
+func (db *DB) CreateChirp(body string, authId int) (Chirp, error) {
 	if err := db.ensureDB(); err != nil {
 		return Chirp{}, err
 	}
@@ -26,8 +27,9 @@ func (db *DB) CreateChirp(body string) (Chirp, error) {
 	index := len(dbBody.Chirps) + 1
 	body = removeProfane(body)
 	return Chirp{
-		Id:   index,
-		Body: body,
+		AuthorId: authId,
+		Id:       index,
+		Body:     body,
 	}, nil
 }
 
