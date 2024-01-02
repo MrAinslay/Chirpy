@@ -6,10 +6,9 @@ import (
 )
 
 type User struct {
-	Id         int    `json:"id"`
-	Password   string `json:"password"`
-	Email      string `json:"email"`
-	Expiration string `json:"expires_in_seconds"`
+	Id       int    `json:"id"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 func (db *DB) createUser(email string, password string, expiration string) (User, error) {
@@ -40,9 +39,8 @@ func (db *DB) createUser(email string, password string, expiration string) (User
 
 	index := len(datbase.Users) + 1
 	return User{
-		Id:         index,
-		Password:   password,
-		Email:      email,
-		Expiration: expiration,
+		Id:       index,
+		Password: password,
+		Email:    email,
 	}, nil
 }

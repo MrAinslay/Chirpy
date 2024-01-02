@@ -18,7 +18,7 @@ type apiConfig struct {
 }
 
 func main() {
-	godotenv.Load()
+	godotenv.Load("key.env")
 	jwtSecret := os.Getenv("JWT_SECRET")
 
 	const filepathRoot = "."
@@ -58,6 +58,8 @@ func main() {
 	apiRouter.Post("/chirps", db.postHandler)
 	apiRouter.Post("/users", db.usersPostHandler)
 	apiRouter.Post("/login", db.loginHnalder)
+	apiRouter.Post("/refresh", db.refreshTokenHandler)
+	apiRouter.Post("/revoke", db.revokeTokenHandler)
 
 	apiRouter.Put("/users", db.putHandler)
 

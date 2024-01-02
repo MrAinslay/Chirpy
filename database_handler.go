@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -13,8 +14,9 @@ type DB struct {
 }
 
 type DBStructure struct {
-	Chirps map[int]Chirp `json:"chirps"`
-	Users  map[int]User  `json:"users"`
+	Chirps         map[int]Chirp        `json:"chirps"`
+	Users          map[int]User         `json:"users"`
+	RevockedTokens map[int]RevokedToken `json:"revoked_tokens"`
 }
 
 func NewDB(path string) (*DB, error) {
@@ -76,12 +78,18 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 	if datbase.Users == nil {
 		datbase.Users = map[int]User{}
 	}
+	if datbase.RevockedTokens == nil {
+		datbase.RevockedTokens = map[int]RevokedToken{}
+	}
 
 	for index, chrp := range dbstructure.Chirps {
 		datbase.Chirps[index] = chrp
 	}
 	for index, usr := range dbstructure.Users {
 		datbase.Users[index] = usr
+	}
+	for index, tkn := range dbstructure.RevockedTokens {
+		datbase.RevockedTokens[index] = tkn
 	}
 
 	dat, err2 := json.Marshal(datbase)
@@ -91,5 +99,26 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 	defer db.mux.Unlock()
 	db.mux.Lock()
 	os.WriteFile("database.json", []byte(dat), 0666)
+	return nil
+}
+
+func (db *DB) updateUser(id string, email string, pass string) error {
+	datbase, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	usrId, _ := strconv.Atoi(id)
+	if usr, ok := datbase.Users[usrId]; ok {
+		usr.Email = email
+		usr.Password = pass
+
+		datbase.Users[usrId] = usr
+	}
+
+	err = db.writeDB(datbase)
+	if err != nil {
+		return err
+	}
 	return nil
 }
