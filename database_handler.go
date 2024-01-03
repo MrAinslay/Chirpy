@@ -11,6 +11,7 @@ import (
 type DB struct {
 	path string
 	mux  *sync.RWMutex
+	cfg  *apiConfig
 }
 
 type DBStructure struct {
@@ -82,9 +83,17 @@ func (db *DB) writeDB(dbstructure DBStructure) error {
 		datbase.RevockedTokens = map[int]RevokedToken{}
 	}
 
-	datbase.Chirps = dbstructure.Chirps
-	datbase.Users = dbstructure.Users
-	datbase.RevockedTokens = dbstructure.RevockedTokens
+	for _, chrp := range dbstructure.Chirps {
+		datbase.Chirps[chrp.Id] = chrp
+	}
+
+	for _, usr := range dbstructure.Users {
+		datbase.Users[usr.Id] = usr
+	}
+
+	for _, tkn := range dbstructure.RevockedTokens {
+		datbase.RevockedTokens[len(datbase.RevockedTokens)+1] = tkn
+	}
 
 	dat, err2 := json.Marshal(datbase)
 	if err2 != nil {
@@ -115,4 +124,25 @@ func (db *DB) updateUser(id string, email string, pass string) error {
 		return err
 	}
 	return nil
+}
+
+func (db *DB) deleteData(typeToDelete string, id int) {
+	datbase, _ := db.loadDB()
+
+	defer db.writeDB(datbase)
+
+	if typeToDelete == "user" {
+		delete(datbase.Users, id)
+		return
+	}
+
+	if typeToDelete == "rvkdtoken" {
+		delete(datbase.RevockedTokens, id)
+		return
+	}
+
+	if typeToDelete == "chirp" {
+		delete(datbase.Chirps, id)
+		return
+	}
 }

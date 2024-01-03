@@ -15,11 +15,13 @@ import (
 type apiConfig struct {
 	fileserverHits int
 	jwtKey         string
+	apiKey         string
 }
 
 func main() {
 	godotenv.Load("key.env")
 	jwtSecret := os.Getenv("JWT_SECRET")
+	apiKey := os.Getenv("API_KEY")
 
 	const filepathRoot = "."
 	const port = "8080"
@@ -30,18 +32,20 @@ func main() {
 
 	mux := &sync.RWMutex{}
 
+	apiCfg := apiConfig{
+		fileserverHits: 0,
+		jwtKey:         jwtSecret,
+		apiKey:         apiKey,
+	}
+
 	db := DB{
 		path: "database.json",
 		mux:  mux,
+		cfg:  &apiCfg,
 	}
 
 	if _, err := os.ReadFile("database.json"); err != nil {
 		db.ensureDB()
-	}
-
-	apiCfg := apiConfig{
-		fileserverHits: 0,
-		jwtKey:         jwtSecret,
 	}
 
 	fsHandler := apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot))))
@@ -60,6 +64,7 @@ func main() {
 	apiRouter.Post("/login", db.loginHnalder)
 	apiRouter.Post("/refresh", db.refreshTokenHandler)
 	apiRouter.Post("/revoke", db.revokeTokenHandler)
+	apiRouter.Post("/polka/webhooks", db.polkaWebhookHanlder)
 
 	apiRouter.Put("/users", db.putHandler)
 

@@ -10,13 +10,13 @@ import (
 
 func (db *DB) usersPostHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Password  string `json:"password"`
-		Email     string `json:"email"`
-		ExpiresAt string `json:"expires_in_seconds"`
+		Password string `json:"password"`
+		Email    string `json:"email"`
 	}
 	type response struct {
-		Id    int    `json:"id"`
-		Email string `json:"email"`
+		Id        int    `json:"id"`
+		Email     string `json:"email"`
+		ChirpyRed bool   `json:"is_chirpy_red"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -33,7 +33,7 @@ func (db *DB) usersPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := db.createUser(params.Email, string(encrPass), params.ExpiresAt)
+	usr, err := db.createUser(params.Email, string(encrPass))
 	if err != nil {
 		respondWithError(w, 400, fmt.Sprint(err))
 		return
@@ -47,8 +47,9 @@ func (db *DB) usersPostHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(201)
 
 	rsp := response{
-		Id:    usr.Id,
-		Email: usr.Email,
+		Id:        usr.Id,
+		Email:     usr.Email,
+		ChirpyRed: false,
 	}
 	respondWithJson(w, rsp)
 }

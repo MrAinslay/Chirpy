@@ -38,5 +38,5 @@ func (db *DB) chirpsDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	delete(datbase.Chirps, id)
 	log.Println(datbase.Chirps)
-	db.writeDB(datbase)
+	db.deleteData("chrip", id)
 }

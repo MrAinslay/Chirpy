@@ -19,6 +19,7 @@ func (db *DB) loginHnalder(w http.ResponseWriter, r *http.Request) {
 	type loginResp struct {
 		Id           int    `json:"id"`
 		Email        string `json:"email"`
+		ChirpyRed    bool   `json:"is_chirpy_red"`
 		AccessToken  string `json:"token"`
 		RefreshToken string `json:"refresh_token"`
 	}
@@ -57,6 +58,7 @@ func (db *DB) loginHnalder(w http.ResponseWriter, r *http.Request) {
 			loginRsp := loginResp{
 				Id:           usr.Id,
 				Email:        usr.Email,
+				ChirpyRed:    usr.ChirpyRed,
 				AccessToken:  tkn,
 				RefreshToken: refreshTkn,
 			}
