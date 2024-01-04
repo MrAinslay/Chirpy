@@ -1,2 +1,3 @@
 # Chirpy
- Project for learning purposes
+
+Chirpy is an API for a service like Twitter
